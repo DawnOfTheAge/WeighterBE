@@ -11,6 +11,8 @@ namespace WeighterBE.Data
 
         public DbSet<Weight> Weights { get; set; }
 
+        public DbSet<User> Users { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -22,6 +24,14 @@ namespace WeighterBE.Data
                 entity.Property(e => e.Value).HasPrecision(5, 2);
             });
 
+            modelBuilder.Entity<User>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Username).HasMaxLength(50);
+                entity.Property(e => e.Email).HasMaxLength(100);
+                entity.HasIndex(e => e.Username).IsUnique();
+                entity.HasIndex(e => e.Email).IsUnique();
+            });
         }
     }
 }
