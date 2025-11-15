@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using WeighterBE.Data;
 using WeighterBE.Models;
 
 namespace WeighterBE.Controllers
@@ -7,80 +9,78 @@ namespace WeighterBE.Controllers
     [Route("api/[controller]")]
     public class WeightsController : ControllerBase
     {
-        private static List<Weight> weights = new();
+        private readonly ApplicationDbContext _context;
 
-        /// <summary>
-        /// Get all weights
-        /// </summary>
-        [HttpGet]
-        public ActionResult<IEnumerable<Weight>> GetWeights()
+        public WeightsController(ApplicationDbContext context)
         {
-            return Ok(weights);
+            _context = context;
         }
 
-        /// <summary>
-        /// Get a weight by id
-        /// </summary>
-        [HttpGet("{id}")]
-        public ActionResult<Weight> GetWeight(int id)
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Weight>>> GetWeights()
         {
-            var weight = weights.FirstOrDefault(w => w.Id == id);
+            return await _context.Weights.ToListAsync();
+        }
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Weight>> GetWeight(int id)
+        {
+            var weight = await _context.Weights.FindAsync(id);
+
             if (weight == null)
             {
                 return NotFound();
             }
 
-            return Ok(weight);
+            return weight;
         }
 
-        /// <summary>
-        /// Create a new weight
-        /// </summary>
         [HttpPost]
-        public ActionResult<Weight> CreateWeight(Weight weight)
+        public async Task<ActionResult<Weight>> CreateWeight(Weight weight)
         {
-            if (weight == null)
-            {
-                return BadRequest();
-            }
-
-            weight.Id = weights.Any() ? weights.Max(w => w.Id) + 1 : 1;
-            weights.Add(weight);
+            _context.Weights.Add(weight);
+            await _context.SaveChangesAsync();
 
             return CreatedAtAction(nameof(GetWeight), new { id = weight.Id }, weight);
         }
 
-        /// <summary>
-        /// Update an existing weight
-        /// </summary>
         [HttpPut("{id}")]
-        public IActionResult UpdateWeight(int id, Weight weight)
+        public async Task<IActionResult> UpdateWeight(int id, Weight weight)
         {
-            var existingWeight = weights.FirstOrDefault(w => w.Id == id);
-            if (existingWeight == null)
+            if (id != weight.Id)
             {
-                return NotFound();
+                return BadRequest();
             }
 
-            existingWeight.Value = weight.Value;
-            existingWeight.WeightAt = weight.WeightAt;
+            _context.Entry(weight).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!_context.Weights.Any(e => e.Id == id))
+                {
+                    return NotFound();
+                }
+                throw;
+            }
 
             return NoContent();
         }
 
-        /// <summary>
-        /// Delete a weight by id
-        /// </summary>
         [HttpDelete("{id}")]
-        public IActionResult DeleteWeight(int id)
+        public async Task<IActionResult> DeleteWeight(int id)
         {
-            var weight = weights.FirstOrDefault(w => w.Id == id);
+            var weight = await _context.Weights.FindAsync(id);
             if (weight == null)
             {
                 return NotFound();
             }
 
-            weights.Remove(weight);
+            _context.Weights.Remove(weight);
+            await _context.SaveChangesAsync();
 
             return NoContent();
         }
