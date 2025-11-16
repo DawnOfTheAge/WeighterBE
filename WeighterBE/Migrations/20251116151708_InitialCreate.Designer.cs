@@ -12,7 +12,7 @@ using WeighterBE.Data;
 namespace WeighterBE.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251115170502_InitialCreate")]
+    [Migration("20251116151708_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -24,6 +24,36 @@ namespace WeighterBE.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("WeighterBE.Models.User", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Password")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Username")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.HasIndex("Username")
+                        .IsUnique();
+
+                    b.ToTable("users", (string)null);
+                });
 
             modelBuilder.Entity("WeighterBE.Models.Weight", b =>
                 {
@@ -42,7 +72,7 @@ namespace WeighterBE.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Weights");
+                    b.ToTable("weights", (string)null);
                 });
 #pragma warning restore 612, 618
         }

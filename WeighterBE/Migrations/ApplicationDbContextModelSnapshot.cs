@@ -49,7 +49,7 @@ namespace WeighterBE.Migrations
                     b.HasIndex("Username")
                         .IsUnique();
 
-                    b.ToTable("Users");
+                    b.ToTable("users", (string)null);
                 });
 
             modelBuilder.Entity("WeighterBE.Models.Weight", b =>
@@ -69,7 +69,7 @@ namespace WeighterBE.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Weights");
+                    b.ToTable("weights", (string)null);
                 });
 #pragma warning restore 612, 618
         }
