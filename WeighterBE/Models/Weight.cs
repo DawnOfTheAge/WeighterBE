@@ -11,5 +11,14 @@
         public DateTime WeightAt { get; set; }
 
         #endregion
+
+        #region Public Methods
+
+        public override string ToString()
+        {
+            return $"Weight {{ Id = {Id}, Value = {Value}, WeightAt = {WeightAt} }}";
+        }
+
+        #endregion
     }
 }
