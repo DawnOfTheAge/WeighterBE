@@ -9,11 +9,11 @@ using WeighterBE.Data;
 
 #nullable disable
 
-namespace WeighterBE.Migrations
+namespace WeighterBE.Migrations.PostgreSQL
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251116151708_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20251117070034_InitialPostgreSql")]
+    partial class InitialPostgreSql
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

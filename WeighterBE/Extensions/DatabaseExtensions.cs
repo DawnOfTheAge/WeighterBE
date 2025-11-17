@@ -71,6 +71,50 @@ namespace WeighterBE.Extensions
             }
         }
 
+        public static async Task InitializeReportsDatabaseAsync(this IHost app)
+        {
+            using var scope = app.Services.CreateScope();
+            var services = scope.ServiceProvider;
+            var logger = services.GetRequiredService<ILogger<Program>>();
+
+            try
+            {
+                var context = services.GetRequiredService<ReportsDbContext>();
+
+                logger.LogInformation("Starting SQL Server (Reports) database initialization...");
+
+                bool canConnect = await context.Database.CanConnectAsync();
+                logger.LogInformation("Can connect to SQL Server database: {CanConnect}", canConnect);
+
+                if (!canConnect)
+                {
+                    logger.LogError("Cannot connect to SQL Server database. Check connection string.");
+                    throw new Exception("Cannot connect to SQL Server database");
+                }
+
+                var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
+                var pendingList = pendingMigrations.ToList();
+
+                if (pendingList.Any())
+                {
+                    logger.LogInformation("Found {Count} pending SQL Server migrations: {Migrations}",
+                        pendingList.Count, string.Join(", ", pendingList));
+                }
+
+                logger.LogInformation("Applying SQL Server database migrations...");
+                await context.Database.MigrateAsync();
+                logger.LogInformation("SQL Server database migrations applied successfully.");
+
+                await CheckSqlServerTablesExistAsync(context, logger);
+                await SeedReportsDataAsync(context, logger);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "An error occurred while initializing SQL Server database: {Message}", ex.Message);
+                throw;
+            }
+        }
+
         private static async Task<bool> CheckTablesExistAsync(ApplicationDbContext context, ILogger logger)
         {
             try
@@ -90,6 +134,25 @@ namespace WeighterBE.Extensions
             catch (Exception ex)
             {
                 logger.LogError(ex, "Error verifying tables: {Message}", ex.Message);
+                return false;
+            }
+        }
+
+        private static async Task<bool> CheckSqlServerTablesExistAsync(ReportsDbContext context, ILogger logger)
+        {
+            try
+            {
+                logger.LogInformation("Verifying SQL Server schema...");
+
+                var reportCount = await context.Reports.CountAsync();
+                logger.LogInformation("Reports table exists with {Count} records", reportCount);
+
+                logger.LogInformation("All required SQL Server tables verified successfully.");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error verifying SQL Server tables: {Message}", ex.Message);
                 return false;
             }
         }
@@ -129,6 +192,37 @@ namespace WeighterBE.Extensions
                 logger.LogError(e, "Failed Seeding Data");
 
                 return;
+            }
+        }
+
+        private static async Task SeedReportsDataAsync(ReportsDbContext context, ILogger logger)
+        {
+            try
+            {
+                logger.LogInformation("Checking if SQL Server (Reports) seeding is needed...");
+
+                var reportCount = await context.Reports.CountAsync();
+
+                if (reportCount == 0)
+                {
+                    logger.LogInformation("Seeding initial report data...");
+
+                    await context.Reports.AddRangeAsync(
+                        new Report { Description = "Sample Report 1", CreatedAt = DateTime.UtcNow },
+                        new Report { Description = "Sample Report 2", CreatedAt = DateTime.UtcNow }
+                    );
+
+                    await context.SaveChangesAsync();
+                    logger.LogInformation("Report data seeded successfully.");
+                }
+                else
+                {
+                    logger.LogInformation("SQL Server database already contains reports. Skipping seed.");
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error during SQL Server data seeding: {Message}", ex.Message);
             }
         }
     }

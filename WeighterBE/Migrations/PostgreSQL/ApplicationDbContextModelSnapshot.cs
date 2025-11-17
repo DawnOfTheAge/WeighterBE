@@ -8,7 +8,7 @@ using WeighterBE.Data;
 
 #nullable disable
 
-namespace WeighterBE.Migrations
+namespace WeighterBE.Migrations.PostgreSQL
 {
     [DbContext(typeof(ApplicationDbContext))]
     partial class ApplicationDbContextModelSnapshot : ModelSnapshot
