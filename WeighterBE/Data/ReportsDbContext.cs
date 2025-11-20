@@ -4,12 +4,8 @@ using WeighterBE.Models;
 
 namespace WeighterBE.Data
 {
-    public class ReportsDbContext : DbContext
+    public class ReportsDbContext(DbContextOptions<ReportsDbContext> options) : DbContext(options)
     {
-        public ReportsDbContext(DbContextOptions<ReportsDbContext> options) : base(options)
-        {
-        }
-
         public DbSet<Report> Reports { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

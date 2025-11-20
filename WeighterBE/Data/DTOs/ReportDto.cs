@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace WeighterBE.Models.DTOs
+namespace WeighterBE.Data.DTOs
 {
     public class CreateReportDto
     {

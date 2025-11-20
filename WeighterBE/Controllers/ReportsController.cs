@@ -2,22 +2,16 @@
 using Microsoft.EntityFrameworkCore;
 using WeighterBE.Data;
 using WeighterBE.Models;
-using WeighterBE.Models.DTOs;
+using WeighterBE.Data.DTOs;
 
 namespace WeighterBE.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class ReportsController : ControllerBase
+    public class ReportsController(ReportsDbContext context, ILogger<ReportsController> logger) : ControllerBase
     {
-        private readonly ReportsDbContext _context;
-        private readonly ILogger<ReportsController> _logger;
-
-        public ReportsController(ReportsDbContext context, ILogger<ReportsController> logger)
-        {
-            _context = context;
-            _logger = logger;
-        }
+        private readonly ReportsDbContext _context = context;
+        private readonly ILogger<ReportsController> _logger = logger;
 
         // GET: api/reports
         [HttpGet]

@@ -7,23 +7,16 @@ namespace WeighterBE.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class UsersController : ControllerBase
+    public class UsersController(ApplicationDbContext context, ILogger<UsersController> logger) : ControllerBase
     {
         #region Data Members
 
-        private readonly ApplicationDbContext _context;
+        private readonly ApplicationDbContext _context = context;
 
-        private readonly ILogger<UsersController> _logger;
+        private readonly ILogger<UsersController> _logger = logger;
 
         #endregion
-
         #region Constructor
-
-        public UsersController(ApplicationDbContext context, ILogger<UsersController> logger)
-        {
-            _context = context;
-            _logger = logger;
-        }
 
         #endregion
 

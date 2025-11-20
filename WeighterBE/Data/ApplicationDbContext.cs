@@ -3,13 +3,9 @@ using WeighterBE.Models;
 
 namespace WeighterBE.Data
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
-        {
-        }
-
-        public DbSet<Weight> Weights { get; set; }
+        public DbSet<WeightRecord> WeightRecords { get; set; }
 
         public DbSet<User> Users { get; set; }
 
@@ -18,21 +14,35 @@ namespace WeighterBE.Data
             base.OnModelCreating(modelBuilder);
 
             // Optional: Configure entities
-            modelBuilder.Entity<Weight>(entity =>
+            modelBuilder.Entity<WeightRecord>(entity =>
             {
-                entity.ToTable("weights");
                 entity.HasKey(e => e.Id);
-                entity.Property(e => e.Value).HasPrecision(5, 2);
+                entity.HasIndex(e => e.UserId);
+                entity.HasIndex(e => e.RecordedAt);
+
+                entity.Property(e => e.Weight).IsRequired().HasPrecision(5, 2);
+                entity.Property(e => e.RecordedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
             });
 
             modelBuilder.Entity<User>(entity =>
             {
                 entity.ToTable("users");
                 entity.HasKey(e => e.Id);
-                entity.Property(e => e.Username).HasMaxLength(50);
-                entity.Property(e => e.Email).HasMaxLength(100);
-                entity.HasIndex(e => e.Username).IsUnique();
                 entity.HasIndex(e => e.Email).IsUnique();
+                entity.HasIndex(e => e.Username).IsUnique();
+
+                entity.Property(e => e.Email).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.Username).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.PasswordHash).IsRequired();
+                entity.Property(e => e.Role).HasMaxLength(50).HasDefaultValue("User");
+                entity.Property(e => e.IsActive).HasDefaultValue(true);
+                entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                // Configure relationship with WeightRecords
+                entity.HasMany(e => e.WeightRecords)
+                      .WithOne(e => e.User)
+                      .HasForeignKey(e => e.UserId)
+                      .OnDelete(DeleteBehavior.Cascade);
             });
         }
     }

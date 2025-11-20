@@ -95,7 +95,7 @@ namespace WeighterBE.Extensions
                 var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
                 var pendingList = pendingMigrations.ToList();
 
-                if (pendingList.Any())
+                if (pendingList.Count != 0)
                 {
                     logger.LogInformation("Found {Count} pending SQL Server migrations: {Migrations}",
                         pendingList.Count, string.Join(", ", pendingList));
@@ -125,7 +125,7 @@ namespace WeighterBE.Extensions
                 var userCount = await context.Users.CountAsync();
                 logger.LogInformation("Users table exists with {Count} records", userCount);
 
-                var weightCount = await context.Weights.CountAsync();
+                var weightCount = await context.WeightRecords.CountAsync();
                 logger.LogInformation("Weights table exists with {Count} records", weightCount);
 
                 logger.LogInformation("All required tables verified successfully.");
@@ -166,21 +166,21 @@ namespace WeighterBE.Extensions
                     logger.LogInformation("Seeding Initial 'users' Data...");
 
                     await context.Users.AddRangeAsync(
-                        new User { Username = "testuser1", Email = "test1@arik.com", Password = "123456" },
-                        new User { Username = "testuser2", Email = "test2@arik.com", Password = "abcdefg" }
+                        new User { Username = "testuser1", Email = "test1@arik.com", PasswordHash = "123456" },
+                        new User { Username = "testuser2", Email = "test2@arik.com", PasswordHash = "abcdefg" }
                     );
 
                     await context.SaveChangesAsync();
                     logger.LogInformation("'users' Data Seeded successfully");
                 }
 
-                if (!await context.Weights.AnyAsync())
+                if (!await context.WeightRecords.AnyAsync())
                 {
                     logger.LogInformation("Seeding Initial 'weights' Data ...");
 
-                    await context.Weights.AddRangeAsync(
-                        new Weight { Value = 75.5, WeightAt = DateTime.UtcNow },
-                        new Weight { Value = 80.0, WeightAt = DateTime.UtcNow }
+                    await context.WeightRecords.AddRangeAsync(
+                        new WeightRecord { Weight = 75.5, RecordedAt = DateTime.UtcNow },
+                        new WeightRecord { Weight = 80.0, RecordedAt = DateTime.UtcNow }
                     );
 
                     await context.SaveChangesAsync();

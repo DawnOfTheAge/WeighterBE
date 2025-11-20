@@ -7,34 +7,27 @@ namespace WeighterBE.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class WeightsController : ControllerBase
+    public class WeightsController(ApplicationDbContext context, ILogger<WeightsController> logger) : ControllerBase
     {
         #region Data Members
 
-        private readonly ApplicationDbContext _context;
+        private readonly ApplicationDbContext _context = context;
 
-        private readonly ILogger<WeightsController> _logger;
+        private readonly ILogger<WeightsController> _logger = logger;
 
         #endregion
-
         #region Constructor
-
-        public WeightsController(ApplicationDbContext context, ILogger<WeightsController> logger)
-        {
-            _context = context;
-            _logger = logger;
-        }
 
         #endregion
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Weight>>> GetWeights()
+        public async Task<ActionResult<IEnumerable<WeightRecord>>> GetWeights()
         {
             try
             {
                 _logger.LogInformation("GET Weights");
 
-                return await _context.Weights.ToListAsync();
+                return await _context.WeightRecords.ToListAsync();
             }
             catch (Exception e)
             {
@@ -45,13 +38,13 @@ namespace WeighterBE.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Weight>> GetWeight(int id)
+        public async Task<ActionResult<WeightRecord>> GetWeight(int id)
         {
             try
             {
                 _logger.LogInformation("GET Weight Id {id}", id);
 
-                var weight = await _context.Weights.FindAsync(id);
+                var weight = await _context.WeightRecords.FindAsync(id);
 
                 if (weight == null)
                 {
@@ -69,13 +62,13 @@ namespace WeighterBE.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Weight>> CreateWeight(Weight weight)
+        public async Task<ActionResult<WeightRecord>> CreateWeight(WeightRecord weight)
         {
             try
             {
                 _logger.LogInformation("CREATE Weight");
 
-                _context.Weights.Add(weight);
+                _context.WeightRecords.Add(weight);
                 await _context.SaveChangesAsync();
 
                 return CreatedAtAction(nameof(GetWeight), new { id = weight.Id }, weight);
@@ -108,7 +101,7 @@ namespace WeighterBE.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!_context.Weights.Any(e => e.Id == id))
+                    if (!_context.WeightRecords.Any(e => e.Id == id))
                     {
                         return NotFound();
                     }
@@ -132,13 +125,13 @@ namespace WeighterBE.Controllers
             {
                 _logger.LogInformation("DELETE Weight Id {id}", id);
 
-                var weight = await _context.Weights.FindAsync(id);
+                var weight = await _context.WeightRecords.FindAsync(id);
                 if (weight == null)
                 {
                     return NotFound();
                 }
 
-                _context.Weights.Remove(weight);
+                _context.WeightRecords.Remove(weight);
                 await _context.SaveChangesAsync();
 
                 return NoContent();
