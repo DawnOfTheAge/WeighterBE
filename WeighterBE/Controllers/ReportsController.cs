@@ -8,9 +8,9 @@ namespace WeighterBE.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class ReportsController(ReportsDbContext context, ILogger<ReportsController> logger) : ControllerBase
+    public class ReportsController(ApplicationDbContext context, ILogger<ReportsController> logger) : ControllerBase
     {
-        private readonly ReportsDbContext _context = context;
+        private readonly ApplicationDbContext _context = context;
         private readonly ILogger<ReportsController> _logger = logger;
 
         // GET: api/reports

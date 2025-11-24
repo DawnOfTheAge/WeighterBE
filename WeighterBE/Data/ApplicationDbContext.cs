@@ -9,13 +9,23 @@ namespace WeighterBE.Data
 
         public DbSet<User> Users { get; set; }
 
+        public DbSet<Report> Reports { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            // Optional: Configure entities
+            modelBuilder.Entity<Report>(entity =>
+            {
+                entity.ToTable("reports");  
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Description).HasMaxLength(1000);
+                entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+            });
+
             modelBuilder.Entity<WeightRecord>(entity =>
             {
+                entity.ToTable("weight_records");
                 entity.HasKey(e => e.Id);
                 entity.HasIndex(e => e.UserId);
                 entity.HasIndex(e => e.RecordedAt);

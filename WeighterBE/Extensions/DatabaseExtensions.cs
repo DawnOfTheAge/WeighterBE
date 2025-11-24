@@ -79,7 +79,7 @@ namespace WeighterBE.Extensions
 
             try
             {
-                var context = services.GetRequiredService<ReportsDbContext>();
+                var context = services.GetRequiredService<ApplicationDbContext>();
 
                 logger.LogInformation("Starting SQL Server (Reports) database initialization...");
 
@@ -138,7 +138,7 @@ namespace WeighterBE.Extensions
             }
         }
 
-        private static async Task<bool> CheckSqlServerTablesExistAsync(ReportsDbContext context, ILogger logger)
+        private static async Task<bool> CheckSqlServerTablesExistAsync(ApplicationDbContext context, ILogger logger)
         {
             try
             {
@@ -195,7 +195,7 @@ namespace WeighterBE.Extensions
             }
         }
 
-        private static async Task SeedReportsDataAsync(ReportsDbContext context, ILogger logger)
+        private static async Task SeedReportsDataAsync(ApplicationDbContext context, ILogger logger)
         {
             try
             {
